@@ -1,0 +1,29 @@
+{
+  "name": "peaksynap",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@types/mongoose": "^5.11.97",
+    "bcrypt": "^5.1.1",
+    "mongoose": "^8.3.2",
+    "next": "13.5.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "13.5.4",
+    "typescript": "^5"
+  }
+}
