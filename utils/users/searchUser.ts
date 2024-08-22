@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const searchUser = async(req: NextApiRequest, res: NextApiResponse) => {
     const query = req.query.query as string;
+    console.log(req);
 
   if (!query) {
     return [];
@@ -21,7 +22,7 @@ const searchUser = async(req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const allUsers = [...exactMatchUsers, ...similarUsers.filter(user => !exactMatchUsers.find(u => u._id.equals(user._id)))];
-
+    
     return allUsers;
   } catch (error) {
     console.error('Error al buscar usuarios:', error);

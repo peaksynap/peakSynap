@@ -1,29 +1,34 @@
 import { IUser, User } from "@/models";
 import bcrypt from "bcrypt";
 
-async function loginUser(
-  email: string,
-  password: string
-): Promise<IUser | null> {
+interface Body {
+  email: string;
+  password: string;
+}
+
+async function loginUser(body: Body): Promise<Omit<IUser, 'password'> | null> {
+  const { email, password } = body;
+
   try {
-    const user: IUser | null = await User.findOne({ email });
+    const user: IUser | null = await User.findOne({ email }).lean();
 
     if (!user) {
-      throw new Error();
+      throw new Error("User not found");
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const passwordMatch = await bcrypt.compare(hashedPassword, user.password);
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      throw new Error();
+      throw new Error("Invalid credentials");
     }
 
+    user.password = ""
     return user;
   } catch (error) {
-    console.error("Error logging in:", error);
-    throw new Error();
+    console.error("Error logging in:", error || error);
+    throw new Error("Failed to login");
   }
 }
 
 export default loginUser;
+

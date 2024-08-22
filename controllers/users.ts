@@ -27,9 +27,11 @@ export const getUserById = async (
   req: NextApiRequest,
   res: NextApiResponse
 ) => {
+  console.log(req)
   try {
     db.connect();
     const user = await getUser(req, res);
+    console.log(req)
     db.disconnect();
     res.status(200).json(user);
   } catch (error) {

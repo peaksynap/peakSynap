@@ -6,11 +6,11 @@ type Data = {error: string} |  IUser
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     switch (req.method) {
-        case 'POST':
-            return sendMail(req, res);
+        // case 'POST':
+        //     return sendMail(req, res);
         case 'PUT':
             return changePassword(req, res);
-        case 'GET': 
+        case 'POST': 
             return login(req, res);
         default:
             return res.status(400).json({error: 'Metodo invalido'})

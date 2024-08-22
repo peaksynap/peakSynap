@@ -32,10 +32,10 @@ export const changePassword = async (
 };
 
 export const login = async(req: NextApiRequest, res: NextApiResponse) => {
-    const {email, password} = req.query
+    const {body} = req
     try {
         db.connect();
-        const user = await loginUser(`${email}`, `${password}`)
+        const user = await loginUser(body)
         db.disconnect();
         res.status(200).json(user)
     } catch (error) {

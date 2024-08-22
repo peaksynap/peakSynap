@@ -13,6 +13,7 @@
     "bcrypt": "^5.1.1",
     "mongoose": "^8.3.2",
     "next": "13.5.4",
+    "nodemailer": "^6.9.14",
     "react": "^18",
     "react-dom": "^18",
     "socket.io": "^4.7.5"
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.12.12",
+    "@types/nodemailer": "^6.4.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
