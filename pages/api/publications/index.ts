@@ -1,4 +1,4 @@
-import { deleteOnePublication, newPublication, refreshPublication } from '@/controllers';
+import { deleteOnePublication, listPublicPublications, newPublication, refreshPublication } from '@/controllers';
 import { IPublication } from '@/models';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -12,6 +12,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
             return refreshPublication(req, res);
         case 'DELETE':
             return deleteOnePublication(req, res);
+        case 'GET': 
+            return listPublicPublications(req, res);
         default:
             return res.status(400).json({error: 'Metodo invalido'})
     }

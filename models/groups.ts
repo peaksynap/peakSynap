@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Types } from 'mongoose';
+import mongoose, { Document, Schema, Types, Model } from "mongoose";
 
 export interface IGroup extends Document {
   name: string;
@@ -8,7 +8,7 @@ export interface IGroup extends Document {
   shorts?: Types.ObjectId;
   longs?: Types.ObjectId;
   simples?: Types.ObjectId;
-  image?: string
+  image?: string;
 }
 
 const GroupSchema = new Schema<IGroup>({
@@ -19,10 +19,9 @@ const GroupSchema = new Schema<IGroup>({
   shorts: { type: Schema.Types.ObjectId, unique: true },
   longs: { type: Schema.Types.ObjectId, unique: true },
   simples: { type: Schema.Types.ObjectId, unique: true },
-  image: {type: String}
+  image: { type: String }
 });
 
-const Group = mongoose.model<IGroup>('Group', GroupSchema);
+const Group: Model<IGroup> = mongoose.models.Group || mongoose.model<IGroup>("Group", GroupSchema);
 
 export default Group;
-

@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Model } from 'mongoose';
 
 export interface IPublication extends Document {
   userId: mongoose.Types.ObjectId;
@@ -21,9 +21,9 @@ const PublicationSchema = new Schema<IPublication>({
   public: { type: Boolean, default: false },
   image: { type: String },
   video: { type: String },
-  detail: { type: String }
+  detail: { type: String },
 });
 
-const Publication = mongoose.model<IPublication>('Publication', PublicationSchema);
+const Publication: Model<IPublication> = mongoose.models.Publication || mongoose.model<IPublication>('Publication', PublicationSchema);
 
 export default Publication;

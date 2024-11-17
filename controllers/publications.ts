@@ -1,5 +1,5 @@
 import { db } from "@/dataBase";
-import { createPublication, deletePublication, editPublication } from "@/utils";
+import { createPublication, deletePublication, editPublication, getPublicPublications } from "@/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const newPublication = async(req: NextApiRequest, res: NextApiResponse) => {
@@ -16,23 +16,30 @@ export const newPublication = async(req: NextApiRequest, res: NextApiResponse) =
 }
 
 export const refreshPublication = async (req: NextApiRequest, res: NextApiResponse) => {
-    const {publicationId, newData} = req.body
+    const { publicationId, newData } = req.body;
+  
     try {
-        db.disconnect();
-        const publication = await editPublication(publicationId, newData)
-        db.disconnect();
-        res.status(200).json(publication)
+      await db.connect(); 
+      console.log(publicationId, newData)
+  
+      const updatedPublication = await editPublication(publicationId, newData);
+  
+      await db.disconnect();
+  
+      res.status(200).json(updatedPublication);
     } catch (error) {
-        db.disconnect();
-        res.status(500).json("Cant't edit publication")
+      await db.disconnect();
+      console.error('Error:', error);
+      res.status(500).json({ error: "Can't edit publication", details: 'error' });
     }
-}
+  };
+  
 
 export const deleteOnePublication = async(req: NextApiRequest, res: NextApiResponse) => {
-    const {publicationId} = req.query
+    const {publicationId, userId} = req.query
     try {
         db.connect();
-        await deletePublication(`${publicationId}`)
+    await deletePublication(`${publicationId}`, `${userId}`)
         db.disconnect();
         res.status(200).json('Publication was deleted successfully')
     } catch (error) {
@@ -40,3 +47,21 @@ export const deleteOnePublication = async(req: NextApiRequest, res: NextApiRespo
         res.status(500).json("Cant't delete publication")
     }
 }
+
+export const listPublicPublications = async (req: NextApiRequest, res: NextApiResponse) => {
+    const { page = 0, limit = 10, short, longs, simple } = req.query;
+  
+    try {
+      const filters = {
+        short: short as string | undefined,
+        longs: longs as string | undefined,
+        simple: simple as string | undefined
+      };
+  
+      const publications = await getPublicPublications(Number(page), Number(limit), filters);
+      res.status(200).json(publications);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching publications' });
+    }
+  };
+  
