@@ -1,11 +1,13 @@
 import { db } from "@/dataBase";
-import { createPublication, deletePublication, editPublication, getPublicPublications } from "@/utils";
+import { createPublication, deletePublication, editPublication, getPublicPublications, runMiddleware } from "@/utils";
+import cors from "@/utils/cors";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const newPublication = async(req: NextApiRequest, res: NextApiResponse) => {
     const {body} = req
     try {
         db.connect();
+        await runMiddleware(req, res, cors);
         const publication = await createPublication(body)
         db.disconnect();
         res.status(200).json(publication)
@@ -21,7 +23,7 @@ export const refreshPublication = async (req: NextApiRequest, res: NextApiRespon
     try {
       await db.connect(); 
       console.log(publicationId, newData)
-  
+      await runMiddleware(req, res, cors);
       const updatedPublication = await editPublication(publicationId, newData);
   
       await db.disconnect();
@@ -39,6 +41,7 @@ export const deleteOnePublication = async(req: NextApiRequest, res: NextApiRespo
     const {publicationId, userId} = req.query
     try {
         db.connect();
+        await runMiddleware(req, res, cors);
     await deletePublication(`${publicationId}`, `${userId}`)
         db.disconnect();
         res.status(200).json('Publication was deleted successfully')
@@ -57,7 +60,7 @@ export const listPublicPublications = async (req: NextApiRequest, res: NextApiRe
         longs: longs as string | undefined,
         simple: simple as string | undefined
       };
-  
+      await runMiddleware(req, res, cors);
       const publications = await getPublicPublications(Number(page), Number(limit), filters);
       res.status(200).json(publications);
     } catch (error) {
