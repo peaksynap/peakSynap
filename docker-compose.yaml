@@ -13,6 +13,7 @@ services:
       - nextjs-network
     volumes:
       - .:/app
+    command: ["npm", "run", "start"]
 
 networks:
   nextjs-network:

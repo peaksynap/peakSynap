@@ -1,13 +1,23 @@
-FROM node:18-alpine
+# Usa una imagen oficial de Node.js con la versión 20.18.0
+FROM node:20.18.0
 
+# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-COPY . .
+# Copia los archivos del proyecto (package.json y package-lock.json)
+COPY package*.json ./
 
+# Instala las dependencias del proyecto
 RUN npm install
 
+# Copia todo el código de la aplicación al contenedor
+COPY . .
+
+# Construye la aplicación Next.js para producción
 RUN npm run build
 
+# Expone el puerto 3000, que es el puerto predeterminado de Next.js
 EXPOSE 3000
 
+# Inicia la aplicación Next.js en modo producción
 CMD ["npm", "start"]
