@@ -51,4 +51,3 @@ export const login = async(req: NextApiRequest, res: NextApiResponse) => {
         res.status(500).json("Can't login");
     }
 };
-
