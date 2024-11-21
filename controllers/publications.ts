@@ -6,13 +6,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 export const newPublication = async(req: NextApiRequest, res: NextApiResponse) => {
     const {body} = req
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
         const publication = await createPublication(body)
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json(publication)
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json("Cant't create publication")
     }
 }
@@ -21,16 +21,16 @@ export const refreshPublication = async (req: NextApiRequest, res: NextApiRespon
     const { publicationId, newData } = req.body;
   
     try {
-      await db.connect(); 
+      await await db.connect(); 
       console.log(publicationId, newData)
       await runMiddleware(req, res, cors);
       const updatedPublication = await editPublication(publicationId, newData);
   
-      await db.disconnect();
+      await await db.disconnect();
   
       res.status(200).json(updatedPublication);
     } catch (error) {
-      await db.disconnect();
+      await await db.disconnect();
       console.error('Error:', error);
       res.status(500).json({ error: "Can't edit publication", details: 'error' });
     }
@@ -40,13 +40,13 @@ export const refreshPublication = async (req: NextApiRequest, res: NextApiRespon
 export const deleteOnePublication = async(req: NextApiRequest, res: NextApiResponse) => {
     const {publicationId, userId} = req.query
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
     await deletePublication(`${publicationId}`, `${userId}`)
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json('Publication was deleted successfully')
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json("Cant't delete publication")
     }
 }

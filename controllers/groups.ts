@@ -6,10 +6,10 @@ import { NextApiRequest, NextApiResponse } from "next";
 export const newGroup = async(req: NextApiRequest, res: NextApiResponse) => {
     const {body} = req
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
         await createGroup(body)
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json('Group created successfully')
     } catch (error) {
         res.status(500).json('Error creating group')
@@ -19,13 +19,13 @@ export const newGroup = async(req: NextApiRequest, res: NextApiResponse) => {
 export const updatedGroup = async(req: NextApiRequest, res: NextApiResponse) => {
     const {groupId, newData} = req.body
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
         const group = await editGroup(groupId, newData)
         db.disconnect
         res.status(200).json(group)
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json('Error updating group')
     }
 }
@@ -33,13 +33,13 @@ export const updatedGroup = async(req: NextApiRequest, res: NextApiResponse) => 
 export const findGroup = async(req: NextApiRequest, res: NextApiResponse) => {
     const {name} = req.query
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
         const groups = await searchGroup(`${name}`)
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json(groups)
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json("Can't find group")
     }
 
@@ -48,13 +48,13 @@ export const findGroup = async(req: NextApiRequest, res: NextApiResponse) => {
 export const joitPublicGroup = async(req: NextApiRequest, res: NextApiResponse) => {
     const {userId, groupId} = req.body
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
         await jointGroup(userId, groupId)
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json('user add success to group')
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json("Can't add user to group")
     }
 }
@@ -62,13 +62,13 @@ export const joitPublicGroup = async(req: NextApiRequest, res: NextApiResponse) 
 export const leavePublicPrivateGroup = async(req: NextApiRequest, res: NextApiResponse) => {
     const {userId, groupId} = req.body;
     try {
-        db.connect();
+        await db.connect();
         await runMiddleware(req, res, cors);
         await leaveGroup(userId, groupId);
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json('user leave group successfully')
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json("Can't leave public group")
     }
 }
@@ -76,13 +76,13 @@ export const leavePublicPrivateGroup = async(req: NextApiRequest, res: NextApiRe
 export const deleteOneGroup = async(req: NextApiRequest, res: NextApiResponse) => {
     const {groupId} = req.query;
     try {
-        db.connect();
+        await db.connect();
         await deleteGroup(`${groupId}`)
         await runMiddleware(req, res, cors);
-        db.disconnect();
+        await db.disconnect();
         res.status(200).json("grop was deleted")
     } catch (error) {
-        db.disconnect();
+        await db.disconnect();
         res.status(500).json("Can't delete group")
     }
 }
