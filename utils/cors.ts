@@ -3,10 +3,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const cors = Cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  origin: '*', 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
+  origin: '*', // Cambia '*' por tu dominio en producción
+  allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
+// Helper para ejecutar middleware en Next.js
 export function runMiddleware(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -23,4 +24,3 @@ export function runMiddleware(
 }
 
 export default cors;
-
