@@ -1,5 +1,5 @@
 import { db } from "@/dataBase";
-import { createGroup, deleteGroup, editGroup, getgroup, jointGroup, leaveGroup } from "@/utils";
+import { createGroup, deleteGroup, editGroup, getgroup, jointGroup, leaveGroup, listGroupUsers, listPublicGroups } from "@/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const newGroup = async(req: NextApiRequest, res: NextApiResponse) => {
@@ -77,5 +77,31 @@ export const deleteOneGroup = async(req: NextApiRequest, res: NextApiResponse) =
     } catch (error) {
         await db.disconnect();
         res.status(500).json("Can't delete group")
+    }
+}
+
+export const listGroups = async(req: NextApiRequest, res: NextApiResponse) => {
+    const {name, page, limit} = req.query;
+    try {
+        await db.connect();
+        const groups = await listPublicGroups(Number(page), Number(limit), `${name}`);
+        await db.disconnect();
+        res.status(200).json(groups);
+    } catch (error) {
+        await db.disconnect();
+        res.status(500).json("Can't list groups")
+    }
+}
+
+export const groupUsersList = async(req: NextApiRequest, res: NextApiResponse) => {
+    const {groupId, page, limit} = req.query;
+    try {
+        await db.connect();
+        const users = await listGroupUsers(`${groupId}`, Number(page), Number(limit));
+        await db.disconnect();
+        res.status(200).json(users);
+    } catch (error) {
+        await db.disconnect();
+        res.status(500).json("Can't list group users")
     }
 }

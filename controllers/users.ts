@@ -4,6 +4,7 @@ import {
   editUser,
   followUser,
   getUser,
+  listGroupUsers,
   registerUser,
   unfollowUser,
 } from "@/utils";
@@ -87,3 +88,16 @@ export const unfollow = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(500).json("Can't unfollow user");
   }
 };
+
+export const userGroups = async(req: NextApiRequest, res: NextApiResponse) => {
+  const {userId, page, limit} = req.query
+  try {
+    await db.connect();
+    const groups = await listGroupUsers(`${userId}`, Number(page), Number(limit))
+    await db.disconnect();
+    res.status(200).json(groups)
+  } catch (error) {
+    await db.disconnect();
+    res.status(500).json("can't get user groups")
+  }
+}
