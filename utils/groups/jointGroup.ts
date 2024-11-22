@@ -1,17 +1,27 @@
 import { Group, User } from "@/models";
 
-const jointGroup = async (userId: string, groupId: string) => {
+const jointGroup = async (userId: string, groupId: string): Promise<boolean> => {
   try {
     const group = await Group.findById(groupId);
-
     if (!group) {
       console.error("Group not found");
-      return false;
+      throw new Error("Group not found");
+    }
+
+    if (group.private) {
+      console.error("The group is private, you cannot join it");
+      throw new Error("The group is private");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      console.error("User not found");
+      throw new Error("User not found");
     }
 
     if (group.users && group.users.includes(userId)) {
       console.error("User is already in the group");
-      return false;
+      throw new Error("User is already in the group");
     }
 
     if (!group.users) {
@@ -19,17 +29,13 @@ const jointGroup = async (userId: string, groupId: string) => {
     }
     group.users.push(userId);
 
-    const user = await User.findById(userId);
-
-    if (!user) {
-      console.error("User not found");
-      return false;
-    }
-
     if (!user.userGroups) {
       user.userGroups = [];
     }
-    user.userGroups.push(groupId);
+
+    if (!user.userGroups.includes(groupId)) {
+      user.userGroups.push(groupId);
+    }
 
     await Promise.all([group.save(), user.save()]);
 

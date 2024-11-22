@@ -15,10 +15,10 @@ export const newGroup = async(req: NextApiRequest, res: NextApiResponse) => {
 }
 
 export const updatedGroup = async(req: NextApiRequest, res: NextApiResponse) => {
-    const {groupId, newData} = req.body
+    const {groupId, userId, newData} = req.body
     try {
         await db.connect();
-        const group = await editGroup(groupId, newData)
+        const group = await editGroup(groupId, newData, userId)
         db.disconnect
         res.status(200).json(group)
     } catch (error) {
@@ -68,10 +68,10 @@ export const leavePublicPrivateGroup = async(req: NextApiRequest, res: NextApiRe
 }
 
 export const deleteOneGroup = async(req: NextApiRequest, res: NextApiResponse) => {
-    const {groupId} = req.query;
+    const {groupId, userId} = req.query;
     try {
         await db.connect();
-        await deleteGroup(`${groupId}`)
+        await deleteGroup(`${groupId}`, `${userId}`)
         await db.disconnect();
         res.status(200).json("grop was deleted")
     } catch (error) {
