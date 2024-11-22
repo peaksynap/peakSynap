@@ -1,5 +1,5 @@
 import { db } from "@/dataBase";
-import { createGroup, deleteGroup, editGroup, jointGroup, leaveGroup, searchGroup } from "@/utils";
+import { createGroup, deleteGroup, editGroup, getgroup, jointGroup, leaveGroup } from "@/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const newGroup = async(req: NextApiRequest, res: NextApiResponse) => {
@@ -28,10 +28,10 @@ export const updatedGroup = async(req: NextApiRequest, res: NextApiResponse) => 
 }
 
 export const findGroup = async(req: NextApiRequest, res: NextApiResponse) => {
-    const {name} = req.query
+    const {groupId} = req.query
     try {
         await db.connect();
-        const groups = await searchGroup(`${name}`)
+        const groups = await getgroup(`${groupId}`)
         await db.disconnect();
         res.status(200).json(groups)
     } catch (error) {
