@@ -1,5 +1,4 @@
 import { IPublication, Publication } from "@/models";
-import { Types } from "mongoose";
 
 interface PaginatedPublications {
   publications: IPublication[];
@@ -14,10 +13,8 @@ const getPublicPublications = async (
   filters: { short?: string; longs?: string; simple?: string }
 ): Promise<PaginatedPublications> => {
   try {
-    // Calcular el valor de skip
     const skip = (page - 1) * limit;
 
-    // Obtener la última publicación pública para hacer la comparación
     const lastPublication = await Publication.findOne({ public: true }).sort({ _id: -1 });
 
     if (!lastPublication) {
@@ -34,18 +31,14 @@ const getPublicPublications = async (
       _id: { $lt: lastPublication._id }
     };
 
-    // Aplicar filtros si existen
     if (filters.short) query.short = filters.short === 'true';
     if (filters.longs) query.longs = filters.longs === 'true';
     if (filters.simple) query.simple = filters.simple === 'true';
 
-    // Contamos el total de publicaciones que coinciden con el filtro
     const total = await Publication.countDocuments(query);
 
-    // Calculamos el número total de páginas
     const totalPages = Math.ceil(total / limit);
 
-    // Verificamos si la página solicitada está dentro del rango válido
     if (page > totalPages) {
       return {
         publications: [],
@@ -55,7 +48,6 @@ const getPublicPublications = async (
       };
     }
 
-    // Obtener las publicaciones paginadas
     const publications = await Publication.find(query)
       .skip(skip)
       .limit(limit)
