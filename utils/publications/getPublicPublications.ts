@@ -1,3 +1,4 @@
+import { Types } from "mongoose"; 
 import { IPublication, Publication } from "@/models";
 
 interface PaginatedPublications {
@@ -10,7 +11,7 @@ interface PaginatedPublications {
 const getPublicPublications = async (
   page: number = 1,
   limit: number = 10,
-  filters: { short?: string; longs?: string; simple?: string }
+  filters: { short?: string; longs?: string; simple?: string; groupId?: string }
 ): Promise<PaginatedPublications> => {
   try {
     const skip = (page - 1) * limit;
@@ -22,18 +23,32 @@ const getPublicPublications = async (
         publications: [],
         total: 0,
         page,
-        limit
+        limit,
       };
     }
 
     const query: any = {
       public: true,
-      _id: { $lt: lastPublication._id }
+      _id: { $lt: lastPublication._id }, 
     };
 
-    if (filters.short) query.short = filters.short === 'true';
-    if (filters.longs) query.longs = filters.longs === 'true';
-    if (filters.simple) query.simple = filters.simple === 'true';
+    if (filters.short) query.short = filters.short === "true";
+    if (filters.longs) query.longs = filters.longs === "true";
+    if (filters.simple) query.simple = filters.simple === "true";
+
+    if (filters.groupId === "") {
+      query.groupId = null; 
+    } else if (filters.groupId) {
+      if (Types.ObjectId.isValid(filters.groupId)) {
+        const id = new Types.ObjectId(filters.groupId);
+        query.groupId =  id
+      } else {
+        console.error("Invalid groupId format:", filters.groupId);
+        throw new Error("Invalid groupId format");
+      }
+    }
+
+    console.log("Generated Query:", query); 
 
     const total = await Publication.countDocuments(query);
 
@@ -44,7 +59,7 @@ const getPublicPublications = async (
         publications: [],
         total,
         page,
-        limit
+        limit,
       };
     }
 
@@ -57,7 +72,7 @@ const getPublicPublications = async (
       publications,
       total,
       page,
-      limit
+      limit,
     };
   } catch (error) {
     console.error("Error fetching publications:", error);

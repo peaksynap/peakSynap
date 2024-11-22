@@ -45,13 +45,14 @@ export const deleteOnePublication = async(req: NextApiRequest, res: NextApiRespo
 }
 
 export const listPublicPublications = async (req: NextApiRequest, res: NextApiResponse) => {
-    const { page = 0, limit = 10, short, longs, simple } = req.query;
+    const { page = 0, limit = 10, short, longs, simple, groupId } = req.query;
   
     try {
       const filters = {
         short: short as string | undefined,
         longs: longs as string | undefined,
-        simple: simple as string | undefined
+        simple: simple as string | undefined,
+        groupId: groupId as string | undefined
       };
       const publications = await getPublicPublications(Number(page), Number(limit), filters);
       res.status(200).json(publications);
