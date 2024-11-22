@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import cors, { runMiddleware } from '../../utils/cors';
 
 type Data = {
   name: string
