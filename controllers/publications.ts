@@ -1,5 +1,5 @@
 import { db } from "@/dataBase";
-import { createPublication, deletePublication, editPublication, getPublicPublications, runMiddleware } from "@/utils";
+import { createPublication, deletePublication, editPublication, getPublicPublications } from "@/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const newPublication = async(req: NextApiRequest, res: NextApiResponse) => {

@@ -5,10 +5,8 @@ import {
   followUser,
   getUser,
   registerUser,
-  runMiddleware,
   unfollowUser,
 } from "@/utils";
-import cors from "@/utils/cors";
 import searchUser from "@/utils/users/searchUser";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -16,7 +14,6 @@ export const register = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await db.connect();
     const user: IUser = req.body;
-    await runMiddleware(req, res, cors);
     const savedUser = await registerUser(user);
     await db.disconnect();
     res.status(200).json(savedUser);
@@ -33,7 +30,6 @@ export const getUserById = async (
   console.log(req)
   try {
     await db.connect();
-    await runMiddleware(req, res, cors);
     const user = await getUser(req, res);
     console.log(req)
     await db.disconnect();
@@ -47,7 +43,6 @@ export const getUserById = async (
 export const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await db.connect();
-    await runMiddleware(req, res, cors);
     const user = await editUser(req, res);
     await db.disconnect();
     res.status(200).json(user);
@@ -60,7 +55,6 @@ export const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
 export const findUsers = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await db.connect();
-    await runMiddleware(req, res, cors);
     const users = await searchUser(req, res);
     await db.disconnect();
     res.status(200).json(users);
@@ -73,7 +67,6 @@ export const findUsers = async (req: NextApiRequest, res: NextApiResponse) => {
 export const follow = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await db.connect();
-    await runMiddleware(req, res, cors);
     await followUser(req, res);
     await db.disconnect();
     res.status(200).json("Fallow user");
@@ -86,7 +79,6 @@ export const follow = async (req: NextApiRequest, res: NextApiResponse) => {
 export const unfollow = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await db.connect();
-    await runMiddleware(req, res, cors);
     await unfollowUser(req, res);
     await db.disconnect();
     res.status(200).json("Unfollow user");
