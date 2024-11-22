@@ -1,13 +1,11 @@
 import { db } from "@/dataBase";
 import { createPublication, deletePublication, editPublication, getPublicPublications, runMiddleware } from "@/utils";
-import cors from "@/utils/cors";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const newPublication = async(req: NextApiRequest, res: NextApiResponse) => {
     const {body} = req
     try {
         await db.connect();
-        await runMiddleware(req, res, cors);
         const publication = await createPublication(body)
         await db.disconnect();
         res.status(200).json(publication)
@@ -21,16 +19,12 @@ export const refreshPublication = async (req: NextApiRequest, res: NextApiRespon
     const { publicationId, newData } = req.body;
   
     try {
-      await await db.connect(); 
-      console.log(publicationId, newData)
-      await runMiddleware(req, res, cors);
+      await db.connect(); 
       const updatedPublication = await editPublication(publicationId, newData);
-  
-      await await db.disconnect();
-  
+      await db.disconnect();
       res.status(200).json(updatedPublication);
     } catch (error) {
-      await await db.disconnect();
+      await db.disconnect();
       console.error('Error:', error);
       res.status(500).json({ error: "Can't edit publication", details: 'error' });
     }
@@ -41,8 +35,7 @@ export const deleteOnePublication = async(req: NextApiRequest, res: NextApiRespo
     const {publicationId, userId} = req.query
     try {
         await db.connect();
-        await runMiddleware(req, res, cors);
-    await deletePublication(`${publicationId}`, `${userId}`)
+        await deletePublication(`${publicationId}`, `${userId}`)
         await db.disconnect();
         res.status(200).json('Publication was deleted successfully')
     } catch (error) {
@@ -60,7 +53,6 @@ export const listPublicPublications = async (req: NextApiRequest, res: NextApiRe
         longs: longs as string | undefined,
         simple: simple as string | undefined
       };
-      await runMiddleware(req, res, cors);
       const publications = await getPublicPublications(Number(page), Number(limit), filters);
       res.status(200).json(publications);
     } catch (error) {
