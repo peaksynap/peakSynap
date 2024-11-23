@@ -4,6 +4,8 @@ import {
   editUser,
   followUser,
   getUser,
+  getUserFollowers,
+  getUserFollowings,
   listGroupUsers,
   registerUser,
   unfollowUser,
@@ -99,5 +101,34 @@ export const userGroups = async(req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     await db.disconnect();
     res.status(500).json("can't get user groups")
+  }
+}
+
+
+export const userFollowes = async(req: NextApiRequest, res: NextApiResponse) => {
+  const {userId, page, limit} = req.query
+  try {
+    await db.connect();
+    const followes = await getUserFollowers(`${userId}`, Number(page), Number(limit))
+    await db.disconnect();
+    res.status(200).json(followes)
+  } catch (error) {
+    db.disconnect();
+    res.status(500).json("can't get user followers")
+  }
+}
+
+export const userFollowings = async(req: NextApiRequest, res: NextApiResponse) => {
+  const {userId, page,limit} = req.query;
+  console.log(`User ${userId}`);
+
+  try {
+    await db.connect();
+    const followings = await getUserFollowings(`${userId}`, Number(page), Number(limit))
+    await db.disconnect();
+    res.status(200).json(followings)
+  } catch (error) {
+    await db.disconnect();
+    res.status(500).json("can't get user followings")
   }
 }
