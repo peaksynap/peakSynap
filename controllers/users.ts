@@ -120,7 +120,6 @@ export const userFollowes = async(req: NextApiRequest, res: NextApiResponse) => 
 
 export const userFollowings = async(req: NextApiRequest, res: NextApiResponse) => {
   const {userId, page,limit} = req.query;
-  console.log(`User ${userId}`);
 
   try {
     await db.connect();

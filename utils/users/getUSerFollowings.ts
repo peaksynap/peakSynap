@@ -18,7 +18,6 @@ const getUserFollowings = async (
 
     const user = await User.findById(userObjectId).select("following");
 
-    console.log(user)
 
     if (!user || !user.following || user.following.length === 0) {
       return {
