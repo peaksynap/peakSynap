@@ -8,7 +8,20 @@ const followUser = async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await User.startSession();
     session.startTransaction();
 
+    const user = await User.findById(userId);
+    if (!user) {
+       res.status(500).json("User not found");
+    }
+
+    const follow = await User.findById(followUserId);
+    if (!follow) {
+      res.status(500).json("User not found");
+    }
+
+
     try {
+
+      
       const user = await User.findByIdAndUpdate(
         userId,
         { $addToSet: { following: followUserId } },
