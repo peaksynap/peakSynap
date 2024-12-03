@@ -1,4 +1,4 @@
-import { Types } from "mongoose"; 
+import mongoose, { Types } from "mongoose";
 import { IPublication, Publication } from "@/models";
 
 interface PaginatedPublications {
@@ -16,51 +16,27 @@ const getPublicPublications = async (
   try {
     const skip = (page - 1) * limit;
 
-    const lastPublication = await Publication.findOne({ public: true }).sort({ _id: -1 });
+    const query: any = {};
 
-    if (!lastPublication) {
-      return {
-        publications: [],
-        total: 0,
-        page,
-        limit,
-      };
+    if (filters.groupId === "" || filters.groupId === null) {
+      query.groupId = { $in: [null] }; 
+    } else if (filters.groupId) {
+      if (mongoose.Types.ObjectId.isValid(filters.groupId)) {
+        query.groupId = new mongoose.Types.ObjectId(filters.groupId);
+      } else {
+        throw new Error("Invalid groupId format");
+      }
     }
-
-    const query: any = {
-      public: true,
-      _id: { $lt: lastPublication._id }, 
-    };
 
     if (filters.short) query.short = filters.short === "true";
     if (filters.longs) query.longs = filters.longs === "true";
     if (filters.simple) query.simple = filters.simple === "true";
 
-    if (filters.groupId === "") {
-      query.groupId = null; 
-    } else if (filters.groupId) {
-      if (Types.ObjectId.isValid(filters.groupId)) {
-        const id = new Types.ObjectId(filters.groupId);
-        query.groupId =  id
-      } else {
-        console.error("Invalid groupId format:", filters.groupId);
-        throw new Error("Invalid groupId format");
-      }
-    }
-
-    console.log("Generated Query:", query); 
-
     const total = await Publication.countDocuments(query);
 
     const totalPages = Math.ceil(total / limit);
-
     if (page > totalPages) {
-      return {
-        publications: [],
-        total,
-        page,
-        limit,
-      };
+      return { publications: [], total, page, limit };
     }
 
     const publications = await Publication.find(query)
@@ -79,5 +55,6 @@ const getPublicPublications = async (
     throw new Error("Error fetching publications");
   }
 };
+
 
 export default getPublicPublications;
