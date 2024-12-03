@@ -54,9 +54,12 @@ export const listPublicPublications = async (req: NextApiRequest, res: NextApiRe
         simple: simple as string | undefined,
         groupId: groupId as string | undefined
       };
+      await db.connect()
       const publications = await getPublicPublications(Number(page), Number(limit), filters);
+      await db.disconnect();
       res.status(200).json(publications);
     } catch (error) {
+      await db.disconnect();
       res.status(500).json({ error: 'Error fetching publications' });
     }
   };
