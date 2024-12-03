@@ -29,13 +29,7 @@ export default async function handler(request: Request) {
       const longs = body.get("longs") === "true";
       const simple = body.get("simple") === "true";
 
-      if (userId && !Types.ObjectId.isValid(userId)) {
-        throw new Error("Invalid userId format");
-      }
-
-      if (groupId && !Types.ObjectId.isValid(groupId)) {
-        throw new Error("Invalid groupId format");
-      }
+    
 
       if (file) {
         const fileKey = `uploads/${userId || "anonymous"}_${Date.now()}_${file.name}`;
