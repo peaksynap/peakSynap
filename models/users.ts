@@ -9,8 +9,6 @@ export interface IUser extends Document {
   residence?: string;
   experiences?: string[];
   skills?: string[];
-  knowledge?: string[];
-  hobbies?: string[];
   interests?: string[];
   followers?: string[];
   following?: string[];
@@ -30,8 +28,6 @@ const UserSchema = new Schema<IUser>({
   residence: { type: String },
   experiences: [{ type: String }],
   skills: [{ type: String }],
-  knowledge: [{ type: String }],
-  hobbies: [{ type: String }],
   interests: [{ type: String }],
   followers: [{ type: String }],
   following: [{ type: String }],

@@ -5,7 +5,8 @@ export interface IGroup extends Document {
   admins: string[];
   private: boolean;
   users?: string[];
-  image?: string;
+  file?: string;
+  paid: boolean;
 }
 
 const GroupSchema = new Schema<IGroup>({
@@ -13,7 +14,8 @@ const GroupSchema = new Schema<IGroup>({
   users: [{ type: String }],
   admins: [{ type: String, required: true }],
   private: { type: Boolean, default: false },
-  image: { type: String }
+  file: { type: String },
+  paid: {type: Boolean, default: false}
 });
 
 const Group: Model<IGroup> = mongoose.models.Group || mongoose.model<IGroup>("Group", GroupSchema);
