@@ -29,6 +29,7 @@ export default async function handler(request: Request) {
       const longs = body.get("longs") === "true";
       const simple = body.get("simple") === "true";
 
+      console.log('fILE RECIBIDO', file)
       console.log("body recibido", body)
 
     
