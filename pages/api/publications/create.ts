@@ -29,9 +29,12 @@ export default async function handler(request: Request) {
       const longs = body.get("longs") === "true";
       const simple = body.get("simple") === "true";
 
+      console.log("body recibido", body)
+
     
 
       if (file) {
+        console.log('Archivo a cargar',file)
         const fileKey = `uploads/${userId || "anonymous"}_${Date.now()}_${file.name}`;
         const uploadParams = {
           Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -48,7 +51,7 @@ export default async function handler(request: Request) {
         const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
         await upload.done();
 
-        await fetch(`http://localhost:3000/api/publications`, {
+        await fetch(`http://peaksynap.com:3000/api/publications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -70,7 +73,7 @@ export default async function handler(request: Request) {
           { status: 200, headers: { "Content-Type": "application/json" } }
         );
       } else {
-        await fetch(`http://localhost:3000/api/publications`, {
+        await fetch(`http://peaksynap.com:3000/api/publications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
