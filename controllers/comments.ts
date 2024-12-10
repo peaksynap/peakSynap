@@ -36,10 +36,10 @@ export const updateComment = async(req: NextApiRequest, res: NextApiResponse) =>
 }
 
 export const commentDelete = async (req: NextApiRequest, res: NextApiResponse) => {
-    const {commentId, userId} = req.body
+    const {commentId, userId} = req.query
     try {
         await db.connect();
-        await deleteComment(commentId, userId);
+        await deleteComment(`${commentId}`, `${userId}`);
         await db.disconnect();
         res.status(200).json('Comment deleted successfully')
 
@@ -51,11 +51,11 @@ export const commentDelete = async (req: NextApiRequest, res: NextApiResponse) =
 
 export const  getCommentsList = async (req: NextApiRequest, res: NextApiResponse) => {
 
-    const {publicationId, page, limit} = req.body;
+    const {publicationId, page, limit} = req.query;
 
     try {
         await db.connect();
-        const data = await listComments(publicationId, page, limit);
+        const data = await listComments(`${publicationId}`, Number(page), Number(limit));
         await db.disconnect();
         res.status(200).json(data);
     } catch (error) {
