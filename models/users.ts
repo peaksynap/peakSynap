@@ -17,6 +17,9 @@ export interface IUser extends Document {
   password: string;
   passwordToken?: string;
   userGroups?: string[];
+  image: string;
+  description: string;
+  rating: number;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -35,8 +38,28 @@ const UserSchema = new Schema<IUser>({
   updatedAt: { type: Date, default: Date.now, required: true },
   password: { type: String, required: true },
   passwordToken: { type: String },
-  userGroups: [{ type: String }]
-});
+  userGroups: [{ type: String }],
+  image: {type: String},
+  description: { type: String },
+  rating: { type: Number, default: 0 },
+},
+{
+  toJSON: {
+    transform(doc, ret) {
+      delete ret.password; 
+      delete ret.passwordToken; 
+      return ret;
+    },
+  },
+  toObject: {
+    transform(doc, ret) {
+      delete ret.password;
+      delete ret.passwordToken;
+      return ret;
+    },
+  },
+}
+);
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 

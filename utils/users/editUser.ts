@@ -1,15 +1,17 @@
 import { IUser, User } from "@/models";
+import { Types } from "mongoose";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const editUser = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<IUser | null> => {
-  const { id } = req.query;
-  const newData = req.body;
 
+  const {body} = req;
+
+  const mongoId = new Types.ObjectId(`${body.id}`);
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(mongoId);
 
     if (!user) {
       throw new Error("can't find user");
@@ -17,13 +19,13 @@ const editUser = async (
 
     const userObject: any = Object.assign({}, user.toJSON());
 
-    Object.keys(newData).forEach((key) => {
+    Object.keys(body).forEach((key) => {
       if (
         key !== "createdAt" &&
         key !== "updatedAt" &&
-        newData[key] !== undefined
+        body[key] !== undefined
       ) {
-        userObject[key] = newData[key];
+        userObject[key] = body[key];
       }
     });
 
@@ -31,7 +33,7 @@ const editUser = async (
 
     userObject.updatedAt = updatedAt;
 
-    const updatedUser = await User.findByIdAndUpdate(id, userObject, {
+    const updatedUser = await User.findByIdAndUpdate(mongoId, userObject, {
       new: true,
     });
 
