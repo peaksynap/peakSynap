@@ -11,7 +11,7 @@ export interface IPublication extends Document {
 }
 
 const PublicationSchema = new Schema<IPublication>({
-  userId: { type: Schema.Types.ObjectId, required: true },  // User reference
+  userId: { type: Schema.Types.ObjectId,ref: 'User', required: true },  // User reference
   groupId: { type: Schema.Types.ObjectId, default: null },
   short: { type: Boolean, default: false },
   longs: { type: Boolean, default: false },

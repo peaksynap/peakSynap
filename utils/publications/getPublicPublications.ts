@@ -1,8 +1,16 @@
 import mongoose, { Types } from "mongoose";
 import { IPublication, Publication } from "@/models";
 
+interface PopulatedPublication extends IPublication {
+  user: {
+    name: string;
+    email: string;
+    image?: string;
+  };
+}
+
 interface PaginatedPublications {
-  publications: IPublication[];
+  publications: PopulatedPublication[];
   total: number;
   page: number;
   limit: number;
@@ -19,7 +27,7 @@ const getPublicPublications = async (
     const query: any = {};
 
     if (filters.groupId === "" || filters.groupId === null) {
-      query.groupId = { $in: [null] }; 
+      query.groupId = { $in: [null] };
     } else if (filters.groupId) {
       if (mongoose.Types.ObjectId.isValid(filters.groupId)) {
         query.groupId = new mongoose.Types.ObjectId(filters.groupId);
@@ -40,9 +48,11 @@ const getPublicPublications = async (
     }
 
     const publications = await Publication.find(query)
+      .populate("userId", "email image fullName") 
       .skip(skip)
       .limit(limit)
-      .sort({ _id: -1 });
+      .sort({ _id: -1 })
+      .lean() as PopulatedPublication[];
 
     return {
       publications,
@@ -55,6 +65,5 @@ const getPublicPublications = async (
     throw new Error("Error fetching publications");
   }
 };
-
 
 export default getPublicPublications;

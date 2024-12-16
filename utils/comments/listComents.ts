@@ -1,8 +1,16 @@
 import { Comment, IComment } from "@/models";
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
+
+interface PopulatedComment extends IComment {
+  user: {
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+}
 
 interface PaginatedComments {
-  comments: IComment[];
+  comments: PopulatedComment[];
   total: number;
   page: number;
   limit: number;
@@ -21,9 +29,11 @@ async function listComments(
     const total = await Comment.countDocuments({ publicationId: publicationObjectId });
 
     const comments = await Comment.find({ publicationId: publicationObjectId })
+      .populate("userId", "email image fullName") 
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }); 
+      .sort({ createdAt: -1 })
+      .lean() as PopulatedComment[]; 
 
     return {
       comments,
