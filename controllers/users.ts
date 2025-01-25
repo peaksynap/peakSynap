@@ -19,11 +19,20 @@ export const register = async (req: NextApiRequest, res: NextApiResponse) => {
     const user: IUser = req.body;
     const savedUser = await registerUser(user);
     await db.disconnect();
-    res.status(200).json(savedUser);
+    res.status(201).json(savedUser);
   } catch (error) {
     await db.disconnect();
-    res.status(500).json("Can't create user");
+    
+    if (error instanceof Error) {
+      if (error.message === "Email already in use") {
+        return res.status(400).json({ error: error.message });
+      }
+    }
+
+    console.error("Unexpected server error:", error);
+    res.status(500).json({ error: "Internal server error see the console for information" });
   }
+
 };
 
 export const getUserById = async (

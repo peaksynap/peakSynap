@@ -5,9 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 type Data = {error: string} |  IUser
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end(); // Respuesta para solicitudes OPTIONS (preflight)
-      }
+    
     switch (req.method) {
         // case 'POST':
         //     return sendMail(req, res);
