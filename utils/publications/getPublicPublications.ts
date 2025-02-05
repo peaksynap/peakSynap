@@ -1,12 +1,14 @@
 import mongoose, { Types } from "mongoose";
 import { IPublication, Publication } from "@/models";
 
-interface PopulatedPublication extends IPublication {
-  user: {
-    name: string;
-    email: string;
-    image?: string;
-  };
+interface PopulatedUser {
+  fullName: string;
+  email: string;
+  image?: string;
+}
+
+interface PopulatedPublication extends Omit<IPublication, "userId"> {
+  user: PopulatedUser;
 }
 
 interface PaginatedPublications {
@@ -23,17 +25,14 @@ const getPublicPublications = async (
 ): Promise<PaginatedPublications> => {
   try {
     const skip = (page - 1) * limit;
-
     const query: any = {};
 
-    if (filters.groupId === "" || filters.groupId === null) {
+    if (!filters.groupId) {
       query.groupId = { $in: [null] };
-    } else if (filters.groupId) {
-      if (mongoose.Types.ObjectId.isValid(filters.groupId)) {
-        query.groupId = new mongoose.Types.ObjectId(filters.groupId);
-      } else {
-        throw new Error("Invalid groupId format");
-      }
+    } else if (mongoose.Types.ObjectId.isValid(filters.groupId)) {
+      query.groupId = new mongoose.Types.ObjectId(filters.groupId);
+    } else {
+      throw new Error("Invalid groupId format");
     }
 
     if (filters.short) query.short = filters.short === "true";
@@ -41,25 +40,28 @@ const getPublicPublications = async (
     if (filters.simple) query.simple = filters.simple === "true";
 
     const total = await Publication.countDocuments(query);
-
     const totalPages = Math.ceil(total / limit);
     if (page > totalPages) {
       return { publications: [], total, page, limit };
     }
 
-    const publications = await Publication.find(query)
-      .populate("userId", "email image fullName") 
+    const rawPublications = await Publication.find(query)
+      .populate<{ userId: PopulatedUser }>("userId", "email image fullName")
       .skip(skip)
       .limit(limit)
       .sort({ _id: -1 })
-      .lean() as PopulatedPublication[];
+      .lean();
 
-    return {
-      publications,
-      total,
-      page,
-      limit,
-    };
+    const publications: PopulatedPublication[] = rawPublications.map((pub) => ({
+      ...pub,
+      user: {
+        fullName: pub.userId.fullName, 
+        email: pub.userId.email,
+        image: pub.userId.image || "",
+      },
+    }));
+
+    return { publications, total, page, limit };
   } catch (error) {
     console.error("Error fetching publications:", error);
     throw new Error("Error fetching publications");
@@ -67,3 +69,4 @@ const getPublicPublications = async (
 };
 
 export default getPublicPublications;
+

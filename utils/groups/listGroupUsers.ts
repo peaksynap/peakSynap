@@ -17,23 +17,24 @@ const listGroupUsers = async (
   limit: number = 10
 ): Promise<PaginatedGroupUsers | null> => {
   try {
-    const objectId = new Types.ObjectId(userId); 
+    const objectId = new Types.ObjectId(userId);
 
-    const user = await User.findById(objectId);
+    const user = await User.findById(objectId).lean<IUser>();
+
     if (!user) {
       console.error(`User with ID ${userId} not found`);
-      throw new Error(`USer with ID ${userId} not found`);
+      throw new Error(`User with ID ${userId} not found`);
     }
 
-    const skip = (page - 1) * limit; 
-    const total = user?.userGroups?.length || 0; 
+    const skip = (page - 1) * limit;
+    const total = user.userGroups?.length || 0;
 
-    const groupsId = user?.userGroups?.slice(skip, skip + limit).map((id) => new Types.ObjectId(id));
+    const groupsId = (user.userGroups || []).slice(skip, skip + limit).map((id) => new Types.ObjectId(id));
 
     const groups = await Group.find({ _id: { $in: groupsId } });
 
     return {
-      userId: user._id.toString(),
+      userId: String(user._id),
       userName: user.fullName,
       groups,
       total,

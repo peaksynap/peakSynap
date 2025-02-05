@@ -1,11 +1,18 @@
 import { Comment, IComment } from "@/models";
-import { Types, Document } from "mongoose";
+import { Types } from "mongoose";
 
-interface PopulatedComment extends IComment {
+interface User {
+  fullName: string;
+  email: string;
+  image?: string;
+}
+
+interface PopulatedComment extends Omit<IComment, "userId"> {
+  userId: User; 
   user: {
     name: string;
     email: string;
-    avatar?: string;
+    image?: string;
   };
 }
 
@@ -23,20 +30,28 @@ async function listComments(
 ): Promise<PaginatedComments> {
   try {
     const publicationObjectId = new Types.ObjectId(publicationId);
-
     const skip = (page - 1) * limit;
 
     const total = await Comment.countDocuments({ publicationId: publicationObjectId });
 
     const comments = await Comment.find({ publicationId: publicationObjectId })
-      .populate("userId", "email image fullName") 
+      .populate<{ userId: User }>("userId", "fullName email image") 
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
-      .lean() as PopulatedComment[]; 
+      .lean(); 
+
+    const populatedComments: PopulatedComment[] = comments.map((comment) => ({
+      ...comment,
+      user: { 
+        name: comment.userId.fullName || "", 
+        email: comment.userId.email || "",  
+        image: comment.userId.image || ""    
+      }
+    }));
 
     return {
-      comments,
+      comments: populatedComments,
       total,
       page,
       limit,

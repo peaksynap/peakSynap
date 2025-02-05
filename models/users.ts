@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
+import mongoose, { Document, Schema, Model, Types } from "mongoose";
 
 export interface IUser extends Document {
   fullName: string;
@@ -20,6 +20,7 @@ export interface IUser extends Document {
   image: string;
   description: string;
   rating: number;
+  _id: Types.ObjectId;
 }
 
 const UserSchema = new Schema<IUser>({

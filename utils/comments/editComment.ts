@@ -5,16 +5,17 @@ async function editComment(
   updatedData: Partial<IComment>
 ): Promise<IComment | null> {
   try {
-   
-
-    const commentObjectId = new Types.ObjectId(updatedData._id);
+    // Ensure _id is either a string or ObjectId
+    const commentObjectId = updatedData._id ? new Types.ObjectId(updatedData.userId) : null;
+    if (!commentObjectId) {
+      throw new Error("Invalid comment ID");
+    }
 
     const existingComment = await Comment.findById(commentObjectId);
     if (!existingComment) {
       throw new Error("Comment does not exist");
     }
 
-   
     const publicationObjectId = new Types.ObjectId(existingComment.publicationId);
 
     const publication = await Publication.findById(publicationObjectId);
@@ -44,4 +45,3 @@ async function editComment(
 }
 
 export default editComment;
-
