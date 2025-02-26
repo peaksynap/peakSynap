@@ -1,4 +1,4 @@
-import { changePassword, login, sendMail } from '@/controllers';
+import { changePassword, login } from '@/controllers';
 import { IUser } from '@/models';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
