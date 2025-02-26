@@ -2,7 +2,7 @@ import { IUser, User } from "@/models";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET ?? '';
 
 async function registerUser(userData: IUser): Promise<{ user: IUser, token: string }> {
   const existingUser = await User.findOne({ email: userData.email });
@@ -12,7 +12,7 @@ async function registerUser(userData: IUser): Promise<{ user: IUser, token: stri
   }
 
   const { password, ...userDataWithoutPassword } = userData;
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password!, 10);
 
   const newUser = new User({
     ...userDataWithoutPassword,
@@ -25,7 +25,7 @@ async function registerUser(userData: IUser): Promise<{ user: IUser, token: stri
   const token = jwt.sign(
     { userId: savedUser._id, email: savedUser.email }, 
     JWT_SECRET, 
-    { expiresIn: '1h' }
+    { expiresIn: '30d' }
   );
 
   return { user: savedUser, token };

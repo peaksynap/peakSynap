@@ -14,7 +14,7 @@ export interface IUser extends Document {
   following?: string[];
   createdAt: Date;
   updatedAt: Date;
-  password: string;
+  password?: string;
   passwordToken?: string;
   userGroups?: string[];
   image: string;

@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET ?? '';
 
 export const authenticateToken = (handler: Function) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader || authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ error: "Unauthorized: No token provided" });
     }
 
