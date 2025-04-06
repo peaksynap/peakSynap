@@ -6,6 +6,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 type Data = {error: string} |  IGroup 
 
 function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     switch (req.method) {
         case 'GET':
             return listGroups(req, res);
