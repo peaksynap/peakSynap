@@ -18,4 +18,4 @@ function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     }
 }
 
-export default authenticateToken(handler)
+export default handler
