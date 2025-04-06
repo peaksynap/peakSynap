@@ -1,7 +1,6 @@
 import { authenticateToken } from "@/middleware/auth";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { Types } from "mongoose";
 
 export const config = {
   runtime: "edge",
