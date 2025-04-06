@@ -11,8 +11,7 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+ 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }

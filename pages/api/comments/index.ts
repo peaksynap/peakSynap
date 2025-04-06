@@ -7,8 +7,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 type Data = {error: string} |  IComment 
 
 function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    
     switch (req.method) {
         case 'POST':
             return newComment(req, res);

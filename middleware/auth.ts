@@ -1,10 +1,34 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
+import Cors from 'cors';
+
+export function initMiddleware(middleware: any) {
+  return (req: any, res: any) =>
+    new Promise((resolve, reject) => {
+      middleware(req, res, (result: any) => {
+        if (result instanceof Error) {
+          return reject(result);
+        }
+        return resolve(result);
+      });
+    });
+}
+
+
+const cors = initMiddleware(
+  Cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  })
+);
 
 const JWT_SECRET = process.env.JWT_SECRET ?? '';
 
 export const authenticateToken = (handler: Function) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
+
+    await cors(req, res); 
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -14,7 +38,7 @@ export const authenticateToken = (handler: Function) => {
     const token = authHeader.split(" ")[1];
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET); 
+      const decoded = jwt.verify(token, JWT_SECRET);
       (req as any).user = decoded;
       return handler(req, res);
     } catch (error) {
