@@ -6,6 +6,8 @@ const JWT_SECRET = process.env.JWT_SECRET ?? '';
 export const authenticateToken = (handler: Function) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const authHeader = req.headers.authorization;
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ error: "Unauthorized: No token provided" });
