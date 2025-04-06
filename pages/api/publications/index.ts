@@ -5,6 +5,9 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 type Data = {error: string} |  IPublication 
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+   
     switch (req.method) {
         case 'POST':
             return newPublication(req, res);
