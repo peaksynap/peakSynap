@@ -1,8 +1,9 @@
 import { traslateToEnglish } from "@/controllers/translateToEnglish";
 import { traslateToSpanish } from "@/controllers/traslateToSpanish";
+import { authenticateToken } from "@/middleware/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default function handler(
+function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -21,3 +22,4 @@ export default function handler(
   return res.status(400).json({error: 'Metodo invalido'})
 
 }
+export default authenticateToken(handler)

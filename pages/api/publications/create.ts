@@ -1,3 +1,4 @@
+import { authenticateToken } from "@/middleware/auth";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Types } from "mongoose";
@@ -14,7 +15,7 @@ const s3 = new S3Client({
   },
 });
 
-export default async function handler(request: Request) {
+async function handler(request: Request) {
   if (request.method === "POST") {
     try {
       const body = await request.formData();
@@ -106,3 +107,5 @@ export default async function handler(request: Request) {
 
   return new Response("Method Not Allowed", { status: 405 });
 }
+
+export default authenticateToken(handler)

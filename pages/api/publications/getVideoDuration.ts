@@ -1,3 +1,4 @@
+import { authenticateToken } from "@/middleware/auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 
@@ -6,7 +7,7 @@ type Data = {
   error?: string;
 };
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
@@ -43,3 +44,5 @@ export default async function handler(
     res.status(500).json({ error: "Failed to calculate video duration" });
   }
 }
+
+export default authenticateToken(handler)

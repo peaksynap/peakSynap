@@ -1,11 +1,12 @@
 import { commentDelete, getCommentsList, newComment, updateComment } from "@/controllers";
+import { authenticateToken } from "@/middleware/auth";
 import { IComment } from "@/models";
 import { NextApiRequest, NextApiResponse } from "next";
 
 
 type Data = {error: string} |  IComment 
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     switch (req.method) {
         case 'POST':
             return newComment(req, res);
@@ -19,3 +20,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
             return res.status(400).json({error: 'Metodo invalido'})
     }
 }
+
+export default authenticateToken(handler)
