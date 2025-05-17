@@ -8,10 +8,9 @@ type Data = {error: string} |  IUser
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
 
      await Cors(req, res, {
-    // Métodos permitidos
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    origin: '*', // Permitir cualquier origen (¡solo para desarrollo!)
-    optionsSuccessStatus: 200, // para navegadores antiguos
+    origin: '*', 
+    optionsSuccessStatus: 200,
   });
     
     switch (req.method) {

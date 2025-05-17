@@ -2,10 +2,19 @@ import {  userGroups } from '@/controllers'
 import { authenticateToken } from '@/middleware/auth';
 import { IUser } from '@/models';
 import type { NextApiRequest, NextApiResponse } from 'next'
+import Cors from 'nextjs-cors';
+
 
 type Data = {error: string} |  IUser
 
-function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+
+    await Cors(req, res, {
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+        origin: '*', 
+        optionsSuccessStatus: 200,
+      });
+
     switch (req.method) {
         case 'GET':
             return userGroups(req, res);
