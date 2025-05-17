@@ -1,10 +1,18 @@
 import { changePassword, login } from '@/controllers';
 import { IUser } from '@/models';
 import type { NextApiRequest, NextApiResponse } from 'next'
+import Cors from 'nextjs-cors';
 
 type Data = {error: string} |  IUser
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+
+     await Cors(req, res, {
+    // Métodos permitidos
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    origin: '*', // Permitir cualquier origen (¡solo para desarrollo!)
+    optionsSuccessStatus: 200, // para navegadores antiguos
+  });
     
     switch (req.method) {
         // case 'POST':
