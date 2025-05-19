@@ -46,7 +46,7 @@ export default async function handler(request: Request) {
 
         const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
 
-        await fetch(`http://localhost:3000/api/users`, {
+        await fetch(`http://3.132.5.30:3000/api/users`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -64,7 +64,7 @@ export default async function handler(request: Request) {
           { status: 200, headers: { "Content-Type": "application/json" } }
         );
       } else {
-        await fetch(`http://localhost:3000/api/users`, {
+        await fetch(`http://3.132.5.30:3000/api/users`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

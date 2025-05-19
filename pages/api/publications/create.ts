@@ -53,7 +53,7 @@ async function handler(request: Request) {
         const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
         await upload.done();
 
-        await fetch(`http://localhost:3000/api/publications`, {
+        await fetch(`http://3.132.5.30:3000/api/publications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -76,7 +76,7 @@ async function handler(request: Request) {
           { status: 200, headers: { "Content-Type": "application/json" } }
         );
       } else {
-        await fetch(`http://localhost:3000/api/publications`, {
+        await fetch(`http://3.132.5.30:3000/api/publications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
