@@ -106,6 +106,7 @@ async function handler(req: any, res: any) {
         });
       } catch (error) {
         console.log(error)
+        res.status(500).json(error)
       }
     }
 
