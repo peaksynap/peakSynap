@@ -8,11 +8,10 @@ import path from "path";
 
 export const config = {
   api: {
-    bodyParser: false, // necesario para formidable
+    bodyParser: false,
   },
 };
 
-// Configura cliente S3
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -21,12 +20,9 @@ const s3 = new S3Client({
   },
 });
 
-// Función para procesar el formulario
 function parseForm(req: any): Promise<{ fields: formidable.Fields; files: formidable.Files }> {
   return new Promise((resolve, reject) => {
-    // Genera un directorio temporal seguro
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "upload-"));
-
     const form = new formidable.IncomingForm({
       keepExtensions: true,
       uploadDir: tempDir,
@@ -39,7 +35,6 @@ function parseForm(req: any): Promise<{ fields: formidable.Fields; files: formid
   });
 }
 
-// Extrae valores de campos
 function getField(field: undefined | string | string[]): string {
   if (!field) return "";
   return Array.isArray(field) ? field[0] : field;
@@ -53,8 +48,7 @@ async function handler(req: any, res: any) {
 
   try {
     const { fields, files } = await parseForm(req);
-
-    console.log("Archivos recibidos:", files); // 🧪 Diagnóstico
+    console.log("Archivos recibidos:", files);
 
     const userId = getField(fields.userId);
     const groupId = getField(fields.groupId);
@@ -63,7 +57,8 @@ async function handler(req: any, res: any) {
     const longs = getField(fields.longs) === "true";
     const simple = getField(fields.simple) === "true";
 
-    const file = files.file as formidable.File | undefined;
+    const fileArray = files.file as formidable.File[] | undefined;
+    const file = fileArray?.[0];
 
     let fileUrl: string | undefined;
 
@@ -89,7 +84,6 @@ async function handler(req: any, res: any) {
 
       await upload.done();
 
-      // Elimina el archivo temporal
       fs.unlink(file.filepath, (err) => {
         if (err) console.error("Error borrando archivo temporal:", err);
       });
@@ -97,7 +91,6 @@ async function handler(req: any, res: any) {
       fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
     }
 
-    // Envío a endpoint externo
     await fetch(`http://3.132.5.30:3000/api/publications`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
