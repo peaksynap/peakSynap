@@ -89,25 +89,27 @@ async function handler(req: any, res: any) {
       });
 
       fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+
+      try {
+        await fetch(`http://3.132.5.30:3000/api/publications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            groupId,
+            short,
+            longs,
+            simple,
+            detail: description,
+            fileUrl: fileUrl
+          }),
+        });
+      } catch (error) {
+        console.log(error)
+      }
     }
 
-    try {
-      await fetch(`http://3.132.5.30:3000/api/publications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          groupId,
-          short,
-          longs,
-          simple,
-          detail: description,
-          fileUrl: fileUrl
-        }),
-      });
-    } catch (error) {
-      console.log(error)
-    }
+   
     
 
     res.status(200).json({
