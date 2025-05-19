@@ -4,6 +4,9 @@ import { Upload } from "@aws-sdk/lib-storage";
 
 export const config = {
   runtime: "nodejs",
+  api: {
+    bodyParser: false, // Important for file uploads
+  },
 };
 
 const s3 = new S3Client({
