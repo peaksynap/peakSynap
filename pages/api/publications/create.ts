@@ -3,7 +3,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 
 export const config = {
-  runtime: "edge",
+  runtime: "nodejs",
 };
 
 const s3 = new S3Client({
@@ -17,6 +17,7 @@ const s3 = new S3Client({
 async function handler(request: Request) {
   if (request.method === "POST") {
     try {
+      console.log('entro')
       const body = await request.formData();
 
       const userId = body.get("userId") as string;
@@ -52,7 +53,7 @@ async function handler(request: Request) {
         const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
         await upload.done();
 
-        await fetch(`http://peaksynap.com:3000/api/publications`, {
+        await fetch(`http://localhost:3000/api/publications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -66,6 +67,7 @@ async function handler(request: Request) {
             fileUrl,
           }),
         });
+        console.log('prueba2')
 
         return new Response(
           JSON.stringify({
@@ -74,7 +76,7 @@ async function handler(request: Request) {
           { status: 200, headers: { "Content-Type": "application/json" } }
         );
       } else {
-        await fetch(`http://peaksynap.com:3000/api/publications`, {
+        await fetch(`http://localhost:3000/api/publications`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -87,7 +89,7 @@ async function handler(request: Request) {
             detail: description,
           }),
         });
-
+          console.log('prueba1')
         return new Response(
           JSON.stringify({
             message: "Publication created successfully",
