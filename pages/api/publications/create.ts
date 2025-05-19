@@ -3,13 +3,16 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import * as formidable from "formidable";
 import fs from "fs";
+import os from "os";
+import path from "path";
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // necesario para formidable
   },
 };
 
+// Configura cliente S3
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -18,12 +21,17 @@ const s3 = new S3Client({
   },
 });
 
+// Función para procesar el formulario
 function parseForm(req: any): Promise<{ fields: formidable.Fields; files: formidable.Files }> {
   return new Promise((resolve, reject) => {
+    // Genera un directorio temporal seguro
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "upload-"));
+
     const form = new formidable.IncomingForm({
       keepExtensions: true,
-      uploadDir: "/tmp", // Ajusta la ruta si usas otro OS o servidor
+      uploadDir: tempDir,
     });
+
     form.parse(req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
@@ -31,10 +39,10 @@ function parseForm(req: any): Promise<{ fields: formidable.Fields; files: formid
   });
 }
 
+// Extrae valores de campos
 function getField(field: undefined | string | string[]): string {
   if (!field) return "";
-  if (Array.isArray(field)) return field[0];
-  return field;
+  return Array.isArray(field) ? field[0] : field;
 }
 
 async function handler(req: any, res: any) {
@@ -46,25 +54,25 @@ async function handler(req: any, res: any) {
   try {
     const { fields, files } = await parseForm(req);
 
+    console.log("Archivos recibidos:", files); // 🧪 Diagnóstico
+
     const userId = getField(fields.userId);
     const groupId = getField(fields.groupId);
     const description = getField(fields.description);
-
     const short = getField(fields.short) === "true";
     const longs = getField(fields.longs) === "true";
     const simple = getField(fields.simple) === "true";
 
     const file = files.file as formidable.File | undefined;
 
-    if (file) {
-      console.log("Archivo recibido:", file);
+    let fileUrl: string | undefined;
 
+    if (file) {
       if (!file.filepath) {
         throw new Error("No se encontró la ruta temporal del archivo");
       }
 
       const fileStream = fs.createReadStream(file.filepath);
-
       const fileKey = `uploads/${userId || "anonymous"}_${Date.now()}_${file.originalFilename}`;
 
       const uploadParams = {
@@ -81,49 +89,41 @@ async function handler(req: any, res: any) {
 
       await upload.done();
 
-      // Opcional: borrar el archivo temporal después de subirlo
+      // Elimina el archivo temporal
       fs.unlink(file.filepath, (err) => {
         if (err) console.error("Error borrando archivo temporal:", err);
       });
 
-      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
-
-      await fetch(`http://3.132.5.30:3000/api/publications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          groupId,
-          description,
-          short,
-          longs,
-          simple,
-          detail: description,
-          fileUrl,
-        }),
-      });
-
-      res.status(200).json({ message: "File uploaded and publication created successfully" });
-    } else {
-      await fetch(`http://3.132.5.30:3000/api/publications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          groupId,
-          description,
-          short,
-          longs,
-          simple,
-          detail: description,
-        }),
-      });
-
-      res.status(200).json({ message: "Publication created successfully" });
+      fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
     }
+
+    // Envío a endpoint externo
+    await fetch(`http://3.132.5.30:3000/api/publications`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        groupId,
+        description,
+        short,
+        longs,
+        simple,
+        detail: description,
+        ...(fileUrl ? { fileUrl } : {}),
+      }),
+    });
+
+    res.status(200).json({
+      message: fileUrl
+        ? "Archivo subido y publicación creada exitosamente"
+        : "Publicación creada exitosamente sin archivo",
+    });
   } catch (error) {
     console.error("Error handling upload:", error);
-    res.status(500).json({ error: "Failed to process request", message: error instanceof Error ? error.message : error });
+    res.status(500).json({
+      error: "Failed to process request",
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
