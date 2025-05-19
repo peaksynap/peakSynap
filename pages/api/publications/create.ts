@@ -97,12 +97,11 @@ async function handler(req: any, res: any) {
       body: JSON.stringify({
         userId,
         groupId,
-        description,
         short,
         longs,
         simple,
         detail: description,
-        ...(fileUrl ? { fileUrl } : {}),
+        fileUrl: fileUrl
       }),
     });
 
