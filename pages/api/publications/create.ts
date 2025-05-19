@@ -1,16 +1,12 @@
-import { authenticateToken } from "@/middleware/auth";
+// pages/api/publications/create.ts
+import { NextApiRequest, NextApiResponse } from 'next';
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import * as formidable from "formidable";
-import fs from "fs";
-import os from "os";
-import path from "path";
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+import mongoose from 'mongoose';
+import formidable from 'formidable';
+import fs from 'fs';
+import { db } from '@/dataBase';
+import { Publication } from '@/models';
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -20,111 +16,92 @@ const s3 = new S3Client({
   },
 });
 
-function parseForm(req: any): Promise<{ fields: formidable.Fields; files: formidable.Files }> {
-  return new Promise((resolve, reject) => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "upload-"));
-    const form = new formidable.IncomingForm({
-      keepExtensions: true,
-      uploadDir: tempDir,
-    });
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-    form.parse(req, (err, fields, files) => {
-      if (err) reject(err);
-      else resolve({ fields, files });
-    });
-  });
-}
-
-function getField(field: undefined | string | string[]): string {
-  if (!field) return "";
-  return Array.isArray(field) ? field[0] : field;
-}
-
-async function handler(req: any, res: any) {
-  if (req.method !== "POST") {
-    res.status(405).send("Method Not Allowed");
-    return;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método no permitido' });
   }
 
   try {
-    const { fields, files } = await parseForm(req);
-    console.log("Archivos recibidos:", files);
+    await db.connect();
 
-    const userId = getField(fields.userId);
-    const groupId = getField(fields.groupId);
-    const description = getField(fields.description);
-    const short = getField(fields.short) === "true";
-    const longs = getField(fields.longs) === "true";
-    const simple = getField(fields.simple) === "true";
+    const form = formidable({ multiples: true });
+    const [fields, files] = await new Promise<[any, any]>((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) reject(err);
+        resolve([fields, files]);
+      });
+    });
 
-    const fileArray = files.file as formidable.File[] | undefined;
-    const file = fileArray?.[0];
+    const userId = fields.userId?.[0] || '';
+    const description = fields.description?.[0] || '';
+    const short = fields.short?.[0] === 'true';
+    const longs = fields.longs?.[0] === 'true';
+    const simple = fields.simple?.[0] === 'true';
+    const groupIdRaw = fields.groupId?.[0] || null;
 
-    let fileUrl: string | undefined;
+    let groupId: mongoose.Types.ObjectId | null = null;
+    if (groupIdRaw && mongoose.Types.ObjectId.isValid(groupIdRaw)) {
+      groupId = new mongoose.Types.ObjectId(groupIdRaw);
+    }
 
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "ID de usuario inválido" });
+    }
+
+    let fileUrl = null;
+    const file = files.file?.[0];
     if (file) {
-      if (!file.filepath) {
-        throw new Error("No se encontró la ruta temporal del archivo");
-      }
-
-      const fileStream = fs.createReadStream(file.filepath);
-      const fileKey = `uploads/${userId || "anonymous"}_${Date.now()}_${file.originalFilename}`;
-
-      const uploadParams = {
-        Bucket: process.env.AWS_S3_BUCKET_NAME || "",
-        Key: fileKey,
-        Body: fileStream,
-        ContentType: file.mimetype || undefined,
-      };
-
-      const upload = new Upload({
-        client: s3,
-        params: uploadParams,
-      });
-
-      await upload.done();
-
-      fs.unlink(file.filepath, (err) => {
-        if (err) console.error("Error borrando archivo temporal:", err);
-      });
-
-      fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
-
       try {
-        await fetch(`http://3.132.5.30:3000/api/publications`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            groupId,
-            short,
-            longs,
-            simple,
-            detail: description,
-            fileUrl: fileUrl
-          }),
+        const fileContent = fs.readFileSync(file.filepath);
+        const safeName = file.originalFilename?.replace(/[^\w.-]/g, '_') || 'file';
+        const fileKey = `uploads/${userId}_${Date.now()}_${safeName}`;
+
+        const upload = new Upload({
+          client: s3,
+          params: {
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: fileKey,
+            Body: fileContent,
+            ContentType: file.mimetype || 'application/octet-stream',
+          },
         });
-      } catch (error) {
-        console.log(error)
-        res.status(500).json(error)
+
+        await upload.done();
+        fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+      } catch (uploadError) {
+        console.error("Error al subir archivo:", uploadError);
       }
     }
 
-   
-    
-
-    res.status(200).json({
-      message: fileUrl
-        ? "Archivo subido y publicación creada exitosamente"
-        : "Publicación creada exitosamente sin archivo",
+    const newPublication = await Publication.create({
+      userId: new mongoose.Types.ObjectId(userId),
+      description,
+      fileUrl,
+      short,
+      longs,
+      simple,
+      groupId: groupId || undefined,
     });
-  } catch (error) {
-    console.error("Error handling upload:", error);
-    res.status(500).json({
-      error: "Failed to process request",
-      message: error instanceof Error ? error.message : String(error),
+
+    return res.status(200).json({
+      success: true,
+      publication: newPublication
+    });
+
+  } catch (error: any) {
+    console.error("❌ Error en el servidor:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Error del servidor"
     });
   }
 }
-
-export default authenticateToken(handler);
