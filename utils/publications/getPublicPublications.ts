@@ -52,8 +52,13 @@ const getPublicPublications = async (
       .sort({ _id: -1 })
       .lean();
 
-    const publications: any[] = rawPublications.map((pub) => ({
-      ...pub
+    const publications: PopulatedPublication[] = rawPublications.map((pub) => ({
+      ...pub,
+      user: {
+        fullName: pub.userId.fullName, 
+        email: pub.userId.email,
+        image: pub.userId.image || "",
+      },
     }));
 
     return { publications, total, page, limit };
