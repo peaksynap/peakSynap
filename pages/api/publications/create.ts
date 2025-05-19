@@ -3,7 +3,6 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 
 export const config = {
-  runtime: "nodejs",
   api: {
     bodyParser: false, // Important for file uploads
   },
