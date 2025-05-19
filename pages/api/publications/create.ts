@@ -1,7 +1,8 @@
 import { authenticateToken } from "@/middleware/auth";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import * as formidable from "formidable";  // <-- Cambiado aquí
+import * as formidable from "formidable";
+import fs from "fs";
 
 export const config = {
   api: {
@@ -19,7 +20,10 @@ const s3 = new S3Client({
 
 function parseForm(req: any): Promise<{ fields: formidable.Fields; files: formidable.Files }> {
   return new Promise((resolve, reject) => {
-    const form = new formidable.IncomingForm();
+    const form = new formidable.IncomingForm({
+      keepExtensions: true,
+      uploadDir: "/tmp", // Ajusta la ruta si usas otro OS o servidor
+    });
     form.parse(req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
@@ -53,7 +57,12 @@ async function handler(req: any, res: any) {
     const file = files.file as formidable.File | undefined;
 
     if (file) {
-      const fs = require("fs");
+      console.log("Archivo recibido:", file);
+
+      if (!file.filepath) {
+        throw new Error("No se encontró la ruta temporal del archivo");
+      }
+
       const fileStream = fs.createReadStream(file.filepath);
 
       const fileKey = `uploads/${userId || "anonymous"}_${Date.now()}_${file.originalFilename}`;
@@ -71,6 +80,11 @@ async function handler(req: any, res: any) {
       });
 
       await upload.done();
+
+      // Opcional: borrar el archivo temporal después de subirlo
+      fs.unlink(file.filepath, (err) => {
+        if (err) console.error("Error borrando archivo temporal:", err);
+      });
 
       const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
 
