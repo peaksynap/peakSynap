@@ -7,6 +7,11 @@ import formidable from 'formidable';
 import fs from 'fs';
 import { db } from '@/dataBase';
 import { Publication } from '@/models';
+import { compressImage, compressVideo, isImage, isVideo } from './../../../utils/media/mediaProcessing';
+import path from 'path';
+import os from 'os';
+
+
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -61,26 +66,40 @@ export default async function handler(
     const file = files.file?.[0];
     if (file) {
       try {
-        const fileContent = fs.readFileSync(file.filepath);
+        const mimetype = file.mimetype || '';
         const safeName = file.originalFilename?.replace(/[^\w.-]/g, '_') || 'file';
+        const tmpCompressedPath = path.join(os.tmpdir(), `compressed_${Date.now()}_${safeName}`);
+    
+        // Comprimir según tipo
+        if (isImage(mimetype)) {
+          await compressImage(file.filepath, tmpCompressedPath);
+        } else if (isVideo(mimetype)) {
+          await compressVideo(file.filepath, tmpCompressedPath);
+        } else {
+          // Si no es imagen o video, usa el archivo original
+          fs.copyFileSync(file.filepath, tmpCompressedPath);
+        }
+    
+        const compressedContent = fs.readFileSync(tmpCompressedPath);
         const fileKey = `uploads/${userId}_${Date.now()}_${safeName}`;
-
+    
         const upload = new Upload({
           client: s3,
           params: {
             Bucket: process.env.AWS_S3_BUCKET_NAME,
             Key: fileKey,
-            Body: fileContent,
-            ContentType: file.mimetype || 'application/octet-stream',
+            Body: compressedContent,
+            ContentType: mimetype || 'application/octet-stream',
           },
         });
-
+    
         await upload.done();
         fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
       } catch (uploadError) {
         console.error("Error al subir archivo:", uploadError);
       }
     }
+    
 
     const newPublication = await Publication.create({
       userId: new mongoose.Types.ObjectId(userId),
