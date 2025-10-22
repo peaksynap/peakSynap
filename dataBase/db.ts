@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+// Importar todos los modelos para asegurar que estén registrados
+import '../models';
+import { registerModels, verifyModels } from '../models/registry';
 
 const mongoConnection = {
     isConnected: 0
@@ -25,6 +28,16 @@ export const connect = async() => {
       
     await mongoose.connect(process.env.MONGO_URL || '');
     mongoConnection.isConnected = 1;
+    
+    // Registrar todos los modelos después de la conexión
+    registerModels();
+    
+    // Verificar que todos los modelos estén registrados
+    const modelsRegistered = verifyModels();
+    if (!modelsRegistered) {
+        console.error('Error: No todos los modelos están registrados correctamente');
+    }
+    
     console.log("Connected to mongodb")
 }
 
