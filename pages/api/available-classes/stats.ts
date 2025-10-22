@@ -86,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             success: true, 
             data: stats 
         });
-    } catch (error) {
+    } catch (error:any) {
         console.error('Error al obtener estadísticas:', error);
         return res.status(500).json({ 
             success: false, 

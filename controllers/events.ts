@@ -118,7 +118,7 @@ export async function createEvent(req: NextApiRequest, res: NextApiResponse) {
             .populate('students.id', 'fullName email image');
 
         return res.status(201).json({ success: true, data: populatedEvent });
-    } catch (error) {
+    } catch (error:any) {
         console.error('Error en createEvent:', error);
         
         // Manejar errores de validación de Mongoose
