@@ -1,5 +1,5 @@
 import { db } from "@/dataBase";
-import { IUser, CalendarEvent, Review } from "@/models";
+import { IUser, CalendarEvent, Review, User } from "@/models";
 import {
   editUser,
   followUser,
@@ -170,8 +170,25 @@ export const getUserProfile = async(req: NextApiRequest, res: NextApiResponse) =
   try {
     await db.connect();
     
-    // Obtener usuario
-    const user = await getUser(req, res);
+    // Validar que userId sea un ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(userId as string)) {
+      await db.disconnect();
+      return res.status(400).json({
+        success: false,
+        error: 'ID de usuario inválido'
+      });
+    }
+    
+    // Obtener usuario directamente desde el modelo
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      await db.disconnect();
+      return res.status(404).json({
+        success: false,
+        error: 'Usuario no encontrado'
+      });
+    }
     
     // Obtener reviews del usuario
     const reviews = await Review.find({ targetId: userId })
@@ -255,12 +272,14 @@ export const getUserProfile = async(req: NextApiRequest, res: NextApiResponse) =
       }
     };
 
+    await db.disconnect();
     return res.status(200).json({
       success: true,
       data: profile
     });
   } catch (error: any) {
     console.error('Error al obtener perfil completo:', error);
+    await db.disconnect();
     return res.status(500).json({
       success: false,
       error: error.message || "Can't get user profile"
