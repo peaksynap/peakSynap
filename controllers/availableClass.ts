@@ -82,6 +82,18 @@ export async function createAvailableClass(req: NextApiRequest, res: NextApiResp
         // Log de datos recibidos para debugging (remover en producción)
         console.log('Datos recibidos en createAvailableClass:', JSON.stringify(req.body, null, 2));
         
+        // Mapeo de colores según tipo de evento
+        const typeColors: Record<string, string> = {
+            'disponibilidad': '#FFE5E5', // Rosa claro
+            'agendadas': '#E5FFE5',     // Verde claro
+            'ofertas': '#E5E5FF',       // Azul claro
+            'recibir': '#FFE5FF'        // Magenta claro
+        };
+
+        // Determinar tipo y color por defecto
+        const eventType = req.body.type || req.body.eventType || 'ofertas';
+        const defaultColor = typeColors[eventType] || '#3498db';
+
         // Preparar datos de la clase con valores por defecto
         const classData = {
             userId: req.body.userId || req.body.user || '68ce0291c4f5d1435816d910',
@@ -89,8 +101,8 @@ export async function createAvailableClass(req: NextApiRequest, res: NextApiResp
             description: req.body.description || req.body.desc || '',
             start: req.body.start || req.body.startDate || req.body.date || new Date(),
             end: req.body.end || req.body.endDate || req.body.endTime || new Date(Date.now() + 60 * 60 * 1000),
-            color: req.body.color || req.body.colorCode || '#3498db',
-            type: req.body.type || req.body.eventType || 'ofertas',
+            type: eventType,
+            color: req.body.color || req.body.colorCode || defaultColor,
             price: req.body.price || 0,
             level: req.body.level || 'Principiante',
             topic: req.body.topic || req.body.subject || '',

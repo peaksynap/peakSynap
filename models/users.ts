@@ -20,6 +20,26 @@ export interface IUser extends Document {
   image: string;
   description: string;
   rating: number;
+  // Nuevos campos para perfil completo
+  coverImage?: string;
+  topic?: string;
+  phone?: string;
+  website?: string;
+  education?: string;
+  languages?: string[];
+  specialties?: string[]; // Alias de skills
+  // Redes sociales
+  instagram?: string;
+  linkedin?: string;
+  twitter?: string;
+  // Disponibilidad
+  isOnline?: boolean;
+  isInPerson?: boolean;
+  isHybrid?: boolean;
+  // Precios
+  individualPricing?: number;
+  groupPricing?: number;
+  pricingCurrency?: string;
   _id: Types.ObjectId;
 }
 
@@ -43,6 +63,23 @@ const UserSchema = new Schema<IUser>({
   image: {type: String},
   description: { type: String },
   rating: { type: Number, default: 0 },
+  // Nuevos campos
+  coverImage: { type: String },
+  topic: { type: String },
+  phone: { type: String },
+  website: { type: String },
+  education: { type: String },
+  languages: [{ type: String }],
+  specialties: [{ type: String }],
+  instagram: { type: String },
+  linkedin: { type: String },
+  twitter: { type: String },
+  isOnline: { type: Boolean, default: true },
+  isInPerson: { type: Boolean, default: false },
+  isHybrid: { type: Boolean, default: false },
+  individualPricing: { type: Number },
+  groupPricing: { type: Number },
+  pricingCurrency: { type: String, default: 'USD' },
 },
 {
   toJSON: {

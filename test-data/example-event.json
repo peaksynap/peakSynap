@@ -1,0 +1,23 @@
+{
+  "userId": "507f1f77bcf86cd799439011",
+  "title": "Sesión de Matemáticas",
+  "description": "Clase de álgebra lineal para estudiantes de ingeniería",
+  "start": "2024-12-20T10:00:00.000Z",
+  "end": "2024-12-20T11:30:00.000Z",
+  "color": "#3498db",
+  "type": "agendadas",
+  "price": 50,
+  "level": "universitario",
+  "topic": "Álgebra Lineal",
+  "maxStudents": 10,
+  "groupClass": true,
+  "maxDuration": 90,
+  "location": "Aula 101",
+  "status": "pending",
+  "students": [
+    {
+      "id": "507f1f77bcf86cd799439012",
+      "name": "Juan Pérez"
+    }
+  ]
+}

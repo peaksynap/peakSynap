@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CalendarEvent, User } from '../models';
-import { validateEventData, prepareEventData, formatValidationError } from '../utils/events/validation';
+import { validateEventData, prepareEventData, formatValidationError, getEventColorByType } from '../utils/events/validation';
 import mongoose from 'mongoose';
 
 // Obtener todos los eventos
@@ -72,6 +72,9 @@ export async function createEvent(req: NextApiRequest, res: NextApiResponse) {
         // Log de datos recibidos para debugging (remover en producción)
         console.log('Datos recibidos en createEvent:', JSON.stringify(req.body, null, 2));
         
+        // Determinar el tipo de evento
+        const eventType = req.body.type || req.body.eventType || 'agendadas';
+        
         // Preparar datos del evento con valores por defecto
         const eventData = {
             userId: req.body.userId || req.body.user || '68ce0291c4f5d1435816d910', // Usar userId por defecto si no se proporciona
@@ -79,8 +82,9 @@ export async function createEvent(req: NextApiRequest, res: NextApiResponse) {
             description: req.body.description || req.body.desc || '',
             start: req.body.start || req.body.startDate || req.body.date || new Date(),
             end: req.body.end || req.body.endDate || req.body.endTime || new Date(Date.now() + 60 * 60 * 1000), // 1 hora después
-            color: req.body.color || req.body.colorCode || '#3498db',
-            type: req.body.type || req.body.eventType || 'agendadas',
+            // Asignar color automáticamente según el tipo de evento
+            color: req.body.color || req.body.colorCode || getEventColorByType(eventType),
+            type: eventType,
             price: req.body.price || 0,
             level: req.body.level || 'intermedio',
             topic: req.body.topic || req.body.subject || '',
@@ -141,9 +145,16 @@ export async function createEvent(req: NextApiRequest, res: NextApiResponse) {
 export async function updateEvent(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { id } = req.query;
+        
+        // Si se está actualizando el tipo de evento, asegurar que el color sea correcto
+        const updateData = { ...req.body };
+        if (updateData.type) {
+            updateData.color = getEventColorByType(updateData.type);
+        }
+        
         const event = await CalendarEvent.findByIdAndUpdate(
             id,
-            { $set: req.body },
+            { $set: updateData },
             { new: true }
         ).populate('userId', 'fullName email image')
          .populate('students.id', 'fullName email image');

@@ -5,6 +5,22 @@ export interface EventValidationResult {
     errors: string[];
 }
 
+// Función para obtener el color según el tipo de evento
+export const getEventColorByType = (type: string): string => {
+    switch (type) {
+        case 'disponibilidad':
+            return '#FFE5E5'; // Rosa claro
+        case 'agendadas':
+            return '#E5FFE5'; // Verde claro
+        case 'ofertas':
+            return '#E5E5FF'; // Azul claro
+        case 'recibir':
+            return '#FFE5FF'; // Magenta claro
+        default:
+            return '#FFE5E5'; // Color por defecto
+    }
+};
+
 export const validateEventData = (eventData: any): EventValidationResult => {
     const errors: string[] = [];
     
@@ -70,8 +86,12 @@ export const validateEventData = (eventData: any): EventValidationResult => {
 };
 
 export const prepareEventData = (eventData: any) => {
+    // Asegurar que el color coincida con el tipo de evento
+    const correctColor = eventData.type ? getEventColorByType(eventData.type) : eventData.color;
+    
     return {
         ...eventData,
+        color: correctColor,
         start: eventData.start ? new Date(eventData.start) : undefined,
         end: eventData.end ? new Date(eventData.end) : undefined
     };
